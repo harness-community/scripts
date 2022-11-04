@@ -67,3 +67,4 @@ print_color "Use below  url as master node url for kuberntes connector setup"
 export KPORT=$(kubectl cluster-info  | head -n 1 | sed 's/.*://')
 export KIP=$(ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | head -1 | awk '{ print $2 }')
 echo "https://${KIP}:${KPORT}"
+
