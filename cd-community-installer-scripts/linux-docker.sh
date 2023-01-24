@@ -32,7 +32,7 @@ check_git() {
     if [ -x "$(command -v git)" ]; then
         return 0
     else
-        printf "$(tput setaf 1)Error: git is not installed. This script requires git to clone Harness CD Community repo.\n $(tput sgr0)"
+        printf "$(tput setaf 1)Error: git is not installed. This script requires git to clone Harness CD Community repo.\n$(tput sgr0)"
         printf "$(tput setaf 1)Install git and rerun the script.\n $(tput sgr0)"
         return 1
     fi
