@@ -113,8 +113,8 @@ setup_and_start_harness_cd() {
     export HARNESS_HOST="$(hostname -i)"
     docker compose -f harness-cd-community/docker-compose/harness/docker-compose.yml up -d
     printf "\n\n"
-    printf "$(tput setaf 3)Congratulations! Deployed docker based Harness CD community edition successfully! \n $(tput sgr0)"
-    printf "$(tput setaf 2)Access the instance using link: $(tput setaf 4)http://$(hostname -i)/#/signup\n $(tput sgr0)"
+    printf "$(tput setaf 3)Congratulations! Deployed docker based Harness CD community edition successfully! $(tput sgr0)\n"
+    printf "$(tput setaf 2)Access the instance using link: $(tput setaf 4)http://$(hostname -i)/#/signup $(tput sgr0)\n"
 }
 
 # Function to check `docker` command. Returns 0 and calls setup_and_start_harness_cd() if installed 
