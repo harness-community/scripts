@@ -16,10 +16,10 @@ AVAILABLE_CPU=$(nproc)
 # Check system resources and fail if the minimum RAM/CPU requirement isn't met
 check_system_requirements() {
     if [[ $AVAILABLE_RAM -lt $REQUIRED_RAM ]]; then
-        printf "\n\nError: Insufficient RAM. Requires $REQUIRED_RAM GB, but only $AVAILABLE_RAM GB available."
+        printf "$(tput setaf 1)Error: Insufficient RAM. Requires $REQUIRED_RAM GB, but only $AVAILABLE_RAM GB available. $(tput sgr0)"
         return 1
     elif [[ $AVAILABLE_CPU -lt $REQUIRED_CPU ]]; then
-        printf "\n\nError: Insufficient CPU. Requires $REQUIRED_CPU cores, but only $AVAILABLE_CPU cores available."
+        printf "$(tput setaf 1)Error: Insufficient CPU. Requires $REQUIRED_CPU cores, but only $AVAILABLE_CPU cores available. $(tput sgr0)"
         return 1
     else
         return 0
@@ -32,8 +32,8 @@ check_git() {
     if [ -x "$(command -v git)" ]; then
         return 0
     else
-        printf "\n\nError: git is not installed. This script requires git to clone Harness CD Community repo."
-        printf "Install git and rerun the script."
+        printf "$(tput setaf 1)Error: git is not installed. This script requires git to clone Harness CD Community repo. $(tput sgr0)"
+        printf "$(tput setaf 1)Install git and rerun the script. $(tput sgr0)\n"
         return 1
     fi
 }
@@ -99,7 +99,7 @@ install_docker() {
         # Debian-based distribution
         install_docker_debian
     else
-        echo "Error: Docker is not installed."
+        printf "$(tput setaf 1)Error: Docker is not installed. $(tput sgr0)\n"
         return 1
     fi
 }
@@ -107,14 +107,13 @@ install_docker() {
 # Clone harness-cd-community GitHub repo and run docker-compose to setup Harness CD Community
 setup_and_start_harness_cd() {
     git clone https://tiny.one/harness-cd-community
-    printf "\nPulling Docker images mentioned in the harness/docker-compose.yml file:\n"
+    printf "\nPulling Docker images mentioned in the harness/docker-compose.yml file: \n"
     docker compose -f harness-cd-community/docker-compose/harness/docker-compose.yml config | grep 'image:' | awk '{print $2}'
     docker compose -f harness-cd-community/docker-compose/harness/docker-compose.yml pull -q
     export HARNESS_HOST="$(hostname -i)"
     docker compose -f harness-cd-community/docker-compose/harness/docker-compose.yml up -d
     printf "\n\n"
-    printf "$(tput setaf 3)Congratulations! Deployed docker based Harness CD community edition successfully! $(tput sgr0)\n\n"
-    printf "\n"
+    printf "$(tput setaf 3)Congratulations! Deployed docker based Harness CD community edition successfully! $(tput sgr0)\n"
     printf "$(tput setaf 2)Access the instance using link: $(tput setaf 4)http://$(hostname -i)/#/signup $(tput sgr0)\n"
 }
 
