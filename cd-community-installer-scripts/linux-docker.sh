@@ -86,12 +86,12 @@ install_docker_debian() {
 # from above. Returns 1 if Docker can't be installed.
 install_docker() {
     # Check the Linux distribution
-    if [ -f /etc/redhat-release ]; then
+    if [ -f /etc/fedora-release ]; then
         # Red Hat-based distribution
-        install_docker_centos
-    elif [ -f /etc/fedora-release ]; then
-        # Fedora distribution
         install_docker_fedora
+    elif [ -f /etc/redhat-release ]; then
+        # Fedora distribution
+        install_docker_centos
     elif [ -f /etc/lsb-release ]; then
         # Ubuntu-based distribution
         install_docker_ubuntu
