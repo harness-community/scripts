@@ -33,7 +33,7 @@ check_git() {
         return 0
     else
         printf "$(tput setaf 1)Error: git is not installed. This script requires git to clone Harness CD Community repo.\n$(tput sgr0)"
-        printf "$(tput setaf 1)Install git and rerun the script.\n $(tput sgr0)"
+        printf "Install git and rerun the script.\n"
         return 1
     fi
 }
