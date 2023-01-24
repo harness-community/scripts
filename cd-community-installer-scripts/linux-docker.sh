@@ -16,10 +16,10 @@ AVAILABLE_CPU=$(nproc)
 # Check system resources and fail if the minimum RAM/CPU requirement isn't met
 check_system_requirements() {
     if [[ $AVAILABLE_RAM -lt $REQUIRED_RAM ]]; then
-        echo "Error: Insufficient RAM. Requires $REQUIRED_RAM GB, but only $AVAILABLE_RAM GB available."
+        printf "\n\nError: Insufficient RAM. Requires $REQUIRED_RAM GB, but only $AVAILABLE_RAM GB available."
         return 1
     elif [[ $AVAILABLE_CPU -lt $REQUIRED_CPU ]]; then
-        echo "Error: Insufficient CPU. Requires $REQUIRED_CPU cores, but only $AVAILABLE_CPU cores available."
+        printf "\n\nError: Insufficient CPU. Requires $REQUIRED_CPU cores, but only $AVAILABLE_CPU cores available."
         return 1
     else
         return 0
@@ -32,8 +32,8 @@ check_git() {
     if [ -x "$(command -v git)" ]; then
         return 0
     else
-        echo "Error: git is not installed. This script requires git to clone Harness CD Community repo."
-        echo "Install git and rerun the script."
+        printf "\n\nError: git is not installed. This script requires git to clone Harness CD Community repo."
+        printf "Install git and rerun the script."
         return 1
     fi
 }
@@ -107,13 +107,15 @@ install_docker() {
 # Clone harness-cd-community GitHub repo and run docker-compose to setup Harness CD Community
 setup_and_start_harness_cd() {
     git clone https://tiny.one/harness-cd-community
-    echo "Pulling below docker images mentioned in the docker-compose.yml file..."
+    printf "\nPulling Docker images mentioned in the harness/docker-compose.yml file:\n"
     docker compose -f harness-cd-community/docker-compose/harness/docker-compose.yml config | grep 'image:' | awk '{print $2}'
     docker compose -f harness-cd-community/docker-compose/harness/docker-compose.yml pull -q
     export HARNESS_HOST="$(hostname -i)"
     docker compose -f harness-cd-community/docker-compose/harness/docker-compose.yml up -d
-    echo "Congratulations! Deployed docker based Harness CD community edition successfully!"
-    echo "Access the instance using link: http://$(hostname -i)/#/signup"
+    printf "\n\n"
+    printf "$(tput setaf 3)Congratulations! Deployed docker based Harness CD community edition successfully! $(tput sgr0)\n\n"
+    printf "\n"
+    printf "$(tput setaf 2)Access the instance using link: $(tput setaf 4)http://$(hostname -i)/#/signup $(tput sgr0)\n"
 }
 
 # Function to check `docker` command. Returns 0 and calls setup_and_start_harness_cd() if installed 
