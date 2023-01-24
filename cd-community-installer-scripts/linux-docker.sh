@@ -13,7 +13,7 @@ REQUITED_CPU=2
 AVAILABLE_RAM=$(free -g | grep Mem | awk '{ print $2 }')
 AVAILABLE_CPU=$(nproc)
 
-
+# Check system resources and fail if the minimum RAM/CPU requirement isn't met
 check_system_requirements() {
     if [[ $AVAILABLE_RAM -lt $REQUIRED_RAM ]]; then
         echo "Error: Insufficient RAM. Requires $REQUIRED_RAM GB, but only $AVAILABLE_RAM GB available."
@@ -27,7 +27,7 @@ check_system_requirements() {
 }
 
 
-# Function to check `git` command. Returns 0 if installed and 1 if not
+# Check `git` command. Returns 0 if installed and 1 if not
 check_git() {
     if [ -x "$(command -v git)" ]; then
         return 0
@@ -38,7 +38,7 @@ check_git() {
     fi
 }
 
-# Function to Install and Enable Docker on Fedora distribution
+# Install and Enable Docker on Fedora distribution
 install_docker_fedora() {
     dnf -y install dnf-plugins-core
     dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
@@ -46,7 +46,7 @@ install_docker_fedora() {
     systemctl enable docker; systemctl start docker
 }
 
-# Function to Install and Enable Docker on CentOS, AlmaLinux, and RockyLinux distributions
+# Install and Enable Docker on CentOS, AlmaLinux, and RockyLinux distributions
 install_docker_centos() {
     dnf -y install yum-utils
     dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
@@ -54,7 +54,7 @@ install_docker_centos() {
     systemctl enable docker; systemctl start docker
 }
 
-# Function to Install and Enable Docker on Ubuntu-based distributions
+# Install and Enable Docker on Ubuntu-based distributions
 install_docker_ubuntu() {
     apt-get update
     apt-get install ca-certificates curl gnupg lsb-release -y
@@ -68,7 +68,7 @@ install_docker_ubuntu() {
     systemctl enable docker; systemctl start docker
 }
 
-# Function to Install and Enable Docker on Debian-based distributions
+# Install and Enable Docker on Debian-based distributions
 install_docker_debian() {
     apt-get update
     apt-get install ca-certificates curl gnupg lsb-release -y
@@ -131,12 +131,13 @@ check_docker() {
     fi
 }
 
-# Entrypoint
+#
+# **** ENTRYPOINT ****
+#
 # Script fails if the:
 #    - system doesn't meet minimum RAM/CPU required for Harness CD Community to run
 #    - if Git cli is not installed
 # Script installs docker if it is not installed already.
-#
 #
 
 if ! check_system_requirements; then
@@ -146,3 +147,4 @@ elif ! check_git; then
 else
     check_docker
 fi
+
