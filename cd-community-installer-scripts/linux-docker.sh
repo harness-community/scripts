@@ -16,10 +16,10 @@ AVAILABLE_CPU=$(nproc)
 # Check system resources and fail if the minimum RAM/CPU requirement isn't met
 check_system_requirements() {
     if [[ $AVAILABLE_RAM -lt $REQUIRED_RAM ]]; then
-        printf "$(tput setaf 1)Error: Insufficient RAM. Requires $REQUIRED_RAM GB, but only $AVAILABLE_RAM GB available. $(tput sgr0)"
+        printf "$(tput setaf 1)Error: Insufficient RAM. Requires $REQUIRED_RAM GB, but only $AVAILABLE_RAM GB available.\n $(tput sgr0)"
         return 1
     elif [[ $AVAILABLE_CPU -lt $REQUIRED_CPU ]]; then
-        printf "$(tput setaf 1)Error: Insufficient CPU. Requires $REQUIRED_CPU cores, but only $AVAILABLE_CPU cores available. $(tput sgr0)"
+        printf "$(tput setaf 1)Error: Insufficient CPU. Requires $REQUIRED_CPU cores, but only $AVAILABLE_CPU cores available.\n $(tput sgr0)"
         return 1
     else
         return 0
@@ -32,8 +32,8 @@ check_git() {
     if [ -x "$(command -v git)" ]; then
         return 0
     else
-        printf "$(tput setaf 1)Error: git is not installed. This script requires git to clone Harness CD Community repo. $(tput sgr0)"
-        printf "$(tput setaf 1)Install git and rerun the script. $(tput sgr0)\n"
+        printf "$(tput setaf 1)Error: git is not installed. This script requires git to clone Harness CD Community repo.\n $(tput sgr0)"
+        printf "$(tput setaf 1)Install git and rerun the script.\n $(tput sgr0)"
         return 1
     fi
 }
@@ -113,8 +113,8 @@ setup_and_start_harness_cd() {
     export HARNESS_HOST="$(hostname -i)"
     docker compose -f harness-cd-community/docker-compose/harness/docker-compose.yml up -d
     printf "\n\n"
-    printf "$(tput setaf 3)Congratulations! Deployed docker based Harness CD community edition successfully! $(tput sgr0)\n"
-    printf "$(tput setaf 2)Access the instance using link: $(tput setaf 4)http://$(hostname -i)/#/signup $(tput sgr0)\n"
+    printf "$(tput setaf 3)Congratulations! Deployed docker based Harness CD community edition successfully! \n $(tput sgr0)"
+    printf "$(tput setaf 2)Access the instance using link: $(tput setaf 4)http://$(hostname -i)/#/signup\n $(tput sgr0)"
 }
 
 # Function to check `docker` command. Returns 0 and calls setup_and_start_harness_cd() if installed 
