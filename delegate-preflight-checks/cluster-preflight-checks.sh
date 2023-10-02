@@ -195,7 +195,7 @@ get_available_cpu_scaled() {
 # Check if the available resources meet delegate requirements
 check_resources() {
     local memory_required_mib=$((2*1024))  # 2 GB in MiB
-    local cpu_required_scaled=500  # 0.5 CPU scaled by 1000
+    local cpu_required_scaled=1000  # 1 CPU scaled by 1000
 
     local memory_available_mib=$(get_available_memory_mib)
     local cpu_available_scaled=$(get_available_cpu_scaled)
