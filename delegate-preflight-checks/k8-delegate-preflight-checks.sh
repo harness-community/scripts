@@ -2,20 +2,19 @@
 
 # FUNCTIONS
 
-# Check for docker installation, otherwise prompt user to install
-check_and_install_docker() {
+# Linux: Check for docker installation, otherwise prompt user to install
+check_and_install_docker_linux() {
     # Check if docker is already installed
     echo "Checking Docker."
-    if command -v docker &> /dev/null; then
+    if command -v docker ps &> /dev/null; then
         echo "Docker is installed."
     else
         # Prompt the user for installation
         read -p "Docker is not installed. Do you want to install Docker? (Y/n): " choice
 
         # Make choice case-insensitive
-        choice=${choice,,}
 
-        if [ "$choice" == "y" ] || [ -z "$choice" ]; then
+        if [ "$choice" == "Y" ]; then
             sh <(curl -fsSL https://get.docker.com)
 	    sudo groupadd docker
 	    sudo usermod -aG docker $USER
@@ -27,6 +26,106 @@ check_and_install_docker() {
     fi
 }
 
+# Mac: Check for docker installation, otherwise prompt user to install 
+check_and_install_docker_mac() {
+    # Check if docker is already installed
+    echo "Checking Docker."
+    if docker ps > /dev/null 2>&1; then
+        echo "Docker is installed."
+    else
+        # Prompt the user for installation
+        read -p "Unable to connect to Docker. Do you want to install and configure Docker? (Y/n): " choice
+
+        if [ "$choice" == "Y" ]; then
+            architecture=$(uname -m)
+            if [[ "$architecture" == "x86_64" ]]; then
+                curl -fsSL https://desktop.docker.com/mac/main/amd64/Docker.dmg
+            elif [[ "$architecture" == "arm"* || "$architecture" == "aarch64" ]]; then
+                curl -fsSL https://desktop.docker.com/mac/main/arm64/Docker.dmg -o Docker.dmg
+            else
+                echo "ERROR: Could not determine system architecture"
+                exit 1
+            fi
+            sudo hdiutil attach Docker.dmg
+            sudo /Volumes/Docker/Docker.app/Contents/MacOS/install --accept-license
+            sudo hdiutil detach /Volumes/Docker
+            rm Docker.dmg
+            echo "DOCKER SUCCESSFULLY INSTALLED."
+            open /Applications/Docker.app
+            connect_retry_count=0
+            max_connect_retries=10
+            while true; do
+                echo "Opening Docker, waiting for Docker engine to start."
+                echo "Accept the terms if prompted."
+                echo "You can skip creating a new account if prompted."
+                echo "Enter password when prompted to accept default permissions."
+                docker ps > /dev/null 2>&1
+                if [ $? -eq 0 ]; then
+                    echo "Successfully connected to docker."
+                    sleep 15
+                    break
+                else
+                    ((connect_retry_count++))
+                    if [[ $connect_retry_count -ge $max_connect_retries ]]; then
+                        echo "ERROR: Failed to connect to Docker after $max_connect_retries attempts. Exiting."
+                        exit 1
+                    else
+                        echo "Unable to connect to Docker. Retrying... ($connect_retry_count/$max_connect_retries)"
+                        sleep 10
+                    fi
+                fi
+            done
+        else
+            echo "ERROR: Docker installation was skipped. Docker is required to proceed."
+            exit 1
+        fi
+    fi
+}
+
+
+# Linux: Check and install kubectl
+check_and_install_kubectl_linux() {
+    if which kubectl > /dev/null 2>&1; then
+        echo "kubectl command exists"
+    else
+        if [[ "$(uname -m)" == "x86_64" ]]; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        elif [[ "$(uname -m)" == "arm"* || "$architecture" == "aarch64" ]]; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"
+        fi
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    fi
+}
+
+# Mac: Check and install kubectl
+check_and_install_kubectl_mac() {
+    if which kubectl > /dev/null 2>&1; then
+        echo "kubectl command exists"
+    else
+        if [[ "$(uname -m)" == "x86_64" ]]; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/amd64/kubectl"
+        elif [[ "$(uname -m)" == "arm"* || "$architecture" == "aarch64" ]]; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/arm64/kubectl"
+        fi
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        sudo chown root: /usr/local/bin/kubectl
+    fi
+}
+
+# Install K3D
+download_and_install_k3d() {
+            curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+            k3d cluster create mycluster
+            if [[ "$(uname -s)" == "Linux" ]]; then
+                check_and_install_kubectl_mac
+            elif [[ "$(uname -s)" == "Darwin" ]]; then
+                check_and_install_kubectl_mac
+            fi
+            kubectl get nodes
+            echo "K3D installed successfully."
+}
+
 check_and_install_cluster() {
     # Check if cluster available
     echo "Checking for cluster."
@@ -36,23 +135,23 @@ check_and_install_cluster() {
         # Prompt to install local cluster
         read -p "Cluster not found. Would you like to set up a local cluster with K3D? (Y/n): " choice
 
-        # Make choice case-insensitive
-        choice=${choice,,}
-
-        if [ "$choice" == "y" ] || [ -z "$choice" ]; then
-            check_and_install_docker
-	    newgrp docker << EOF
-            sudo systemctl enable --now docker 
-	    curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-	    k3d cluster create mycluster
-	    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-	    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-	    kubectl get nodes
-            echo "K3D installed successfully."
+        if [ "$choice" == "Y" ]; then
+            if [[ "$(uname -s)" == "Linux" ]]; then
+                check_and_install_docker_linux
+                newgrp docker << EOF
+                sudo systemctl enable --now docker
+                download_and_install_k3d
 EOF
+            elif [[ "$(uname -s)" == "Darwin" ]]; then
+                check_and_install_docker_mac
+                download_and_install_k3d
+            else
+                echo "ERROR: Unsupported operating system."
+                exit 1
+            fi
         else
             echo "ERROR: A Kubernetes cluster is required to proceed."
-	    exit 1
+            exit 1
         fi
     fi
 }
@@ -115,6 +214,8 @@ check_resources() {
 # --------------------------------------------------
 
 # MAIN PROGRAM
+
+echo "Some commands may require sudo. Enter your password if prompted."
 
 # Check if cluster exists, otherwise prompt to install
 check_and_install_cluster
