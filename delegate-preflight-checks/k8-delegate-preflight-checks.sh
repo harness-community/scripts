@@ -6,7 +6,7 @@
 check_and_install_docker_linux() {
     # Check if docker is already installed
     echo "Checking Docker."
-    if command -v docker ps &> /dev/null; then
+    if docker ps > /dev/null 2>&1; then
         echo "Docker is installed."
     else
         # Prompt the user for installation
