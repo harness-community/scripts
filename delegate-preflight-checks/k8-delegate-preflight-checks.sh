@@ -16,8 +16,7 @@ check_and_install_docker() {
         choice=${choice,,}
 
         if [ "$choice" == "y" ] || [ -z "$choice" ]; then
-            curl -fsSL https://get.docker.com -o get-docker.sh
-            sh get-docker.sh 
+            sh <(curl -fsSL https://get.docker.com)
 	    sudo groupadd docker
 	    sudo usermod -aG docker $USER
             echo "Docker installed successfully."
@@ -122,4 +121,3 @@ check_and_install_cluster
 
 # Check available resources against delegate requirements
 check_resources
-
