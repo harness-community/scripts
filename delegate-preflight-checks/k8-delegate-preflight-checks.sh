@@ -114,11 +114,9 @@ check_and_install_kubectl_mac() {
 }
 
 # Install K3D
-download_and_install_k3d() {
-            curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-            k3d cluster create mycluster
+verify_kubectl() {
             if [[ "$(uname -s)" == "Linux" ]]; then
-                check_and_install_kubectl_mac
+                check_and_install_kubectl_linux
             elif [[ "$(uname -s)" == "Darwin" ]]; then
                 check_and_install_kubectl_mac
             fi
@@ -140,11 +138,15 @@ check_and_install_cluster() {
                 check_and_install_docker_linux
                 newgrp docker << EOF
                 sudo systemctl enable --now docker
+                curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+                k3d cluster create mycluster
 EOF
-                download_and_install_k3d
+                verify_kubectl
             elif [[ "$(uname -s)" == "Darwin" ]]; then
                 check_and_install_docker_mac
-                download_and_install_k3d
+                curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+                k3d cluster create mycluster
+		verify_kubectl
             else
                 echo "ERROR: Unsupported operating system."
                 exit 1
