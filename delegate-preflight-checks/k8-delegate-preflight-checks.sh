@@ -140,8 +140,8 @@ check_and_install_cluster() {
                 check_and_install_docker_linux
                 newgrp docker << EOF
                 sudo systemctl enable --now docker
-                download_and_install_k3d
 EOF
+                download_and_install_k3d
             elif [[ "$(uname -s)" == "Darwin" ]]; then
                 check_and_install_docker_mac
                 download_and_install_k3d
